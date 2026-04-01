@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Job Tracker Pro
 
-## Getting Started
+A portfolio-focused Next.js app for tracking applications, interviews, follow-ups, and offers.
 
-First, run the development server:
+## Why This Project
+
+This app is designed to strengthen core React and Next.js fundamentals with practical features that are easy to explain in interviews:
+
+- App Router architecture
+- Server and client component boundaries
+- Route handlers and data mutations
+- Form UX and validation
+- Sorting, filtering, and pagination
+- Auth and role-based pages
+
+## Run Locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Milestone Plan
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Milestone 1: UI foundation (current)
 
-## Learn More
+- Dashboard shell with KPI cards and recent applications table
+- Design system colors and typography
+- Mobile-responsive layout
 
-To learn more about Next.js, take a look at the following resources:
+### Milestone 2: Core CRUD with local data
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Add route for application list and detail pages
+- Add new application form with validation
+- Edit and delete actions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Milestone 3: Real backend
 
-## Deploy on Vercel
+- Add Prisma + Postgres
+- Build route handlers for applications and notes
+- Add seed script for demo data
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Milestone 4: Auth and protected routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Sign in and sign out flows
+- User-specific dashboard data
+- Middleware for protected pages
+
+### Milestone 5: Portfolio polish
+
+- Pipeline analytics chart
+- Saved filters
+- Empty/loading/error states
+- README screenshots and architecture notes
+
+## Suggested Tech Stack Upgrades
+
+- Form handling: react-hook-form + zod
+- Data and cache: TanStack Query or server actions
+- Database: Postgres + Prisma
+- Auth: Clerk or Auth.js
+- Charts: Recharts
+
+## Deploy
+
+```bash
+npx vercel --prod
+```
+
+## Portfolio Checklist
+
+- Add a short case study in README (problem, choices, tradeoffs)
+- Include screenshots and a live Vercel URL
+- Add a short Loom walkthrough
+- Keep commit history clean and incremental
