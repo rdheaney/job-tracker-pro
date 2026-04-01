@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ApplicationForm } from '@/components/ApplicationForm';
 import { updateApplicationAction } from '@/app/actions/applications';
-import { getApplication } from '@/lib/store';
+import { getApplicationById } from '@/lib/applications';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -10,7 +10,7 @@ interface Props {
 
 export default async function EditApplicationPage({ params }: Props) {
   const { id } = await params;
-  const application = getApplication(id);
+  const application = await getApplicationById(id);
   if (!application) notFound();
 
   // Bind the id so the Server Action receives it as the first argument.

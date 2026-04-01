@@ -63,6 +63,27 @@ Open http://localhost:3000.
 - Auth: Clerk or Auth.js
 - Charts: Recharts
 
+## Milestone 3 Database Setup
+
+1. Update DATABASE_URL in .env to your Postgres instance.
+2. Generate Prisma client:
+
+```bash
+npm run db:generate
+```
+
+3. Create and apply your first migration:
+
+```bash
+npm run db:migrate -- --name init
+```
+
+4. Seed demo records:
+
+```bash
+npm run db:seed
+```
+
 ## Deploy
 
 ```bash

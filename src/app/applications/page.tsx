@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import { getApplications } from '@/lib/store';
+import { listApplications } from '@/lib/applications';
 import { DeleteButton } from '@/components/DeleteButton';
 import type { Stage } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
 
 const stageStyles: Record<Stage, string> = {
   Applied: 'bg-[#e4f2ef] text-[#0d5f59]',
@@ -12,8 +14,8 @@ const stageStyles: Record<Stage, string> = {
   Withdrawn: 'bg-[#f4f4f5] text-[#71717a]',
 };
 
-export default function ApplicationsPage() {
-  const applications = getApplications();
+export default async function ApplicationsPage() {
+  const applications = await listApplications();
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 md:px-8">

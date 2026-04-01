@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { getApplications } from "@/lib/store";
+import { listApplications } from "@/lib/applications";
 import type { Stage } from "@/lib/types";
+
+export const dynamic = 'force-dynamic';
 
 const stageStyles: Record<Stage, string> = {
   Applied: "bg-[#e4f2ef] text-[#0d5f59]",
@@ -11,8 +13,8 @@ const stageStyles: Record<Stage, string> = {
   Withdrawn: "bg-[#f4f4f5] text-[#71717a]",
 };
 
-export default function Home() {
-  const all = getApplications();
+export default async function Home() {
+  const all = await listApplications();
   const total = all.length;
   const interviews = all.filter((a) => a.stage === "Interview").length;
   const offers = all.filter((a) => a.stage === "Offer").length;

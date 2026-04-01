@@ -2,7 +2,11 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { addApplication, replaceApplication, removeApplication } from '@/lib/store';
+import {
+  createApplication,
+  updateApplication,
+  deleteApplication,
+} from '@/lib/applications';
 import type { Application, Stage } from '@/lib/types';
 
 export type FormState = {
@@ -48,7 +52,8 @@ export async function createApplicationAction(
   const errors = validate(data);
   if (errors) return { errors };
 
-  addApplication({ id: crypto.randomUUID(), ...data });
+  await createApplication(data);
+  revalidatePath('/');
   revalidatePath('/applications');
   redirect('/applications');
 }
@@ -62,12 +67,14 @@ export async function updateApplicationAction(
   const errors = validate(data);
   if (errors) return { errors };
 
-  replaceApplication({ id, ...data });
+  await updateApplication(id, data);
+  revalidatePath('/');
   revalidatePath('/applications');
   redirect('/applications');
 }
 
 export async function deleteApplicationAction(id: string): Promise<void> {
-  removeApplication(id);
+  await deleteApplication(id);
+  revalidatePath('/');
   revalidatePath('/applications');
 }
