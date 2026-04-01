@@ -1,40 +1,32 @@
+import Link from "next/link";
+import { getApplications } from "@/lib/store";
+import type { Stage } from "@/lib/types";
+
+const stageStyles: Record<Stage, string> = {
+  Applied: "bg-[#e4f2ef] text-[#0d5f59]",
+  "Phone Screen": "bg-[#eef2ff] text-[#3730a3]",
+  Interview: "bg-[#fff2dc] text-[#8b5a0b]",
+  Offer: "bg-[#e8ecf7] text-[#1c3260]",
+  Rejected: "bg-[#fef2f1] text-[#8b2218]",
+  Withdrawn: "bg-[#f4f4f5] text-[#71717a]",
+};
+
 export default function Home() {
+  const all = getApplications();
+  const total = all.length;
+  const interviews = all.filter((a) => a.stage === "Interview").length;
+  const offers = all.filter((a) => a.stage === "Offer").length;
+  const responded = all.filter((a) => a.stage !== "Applied").length;
+  const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0;
+
   const stats = [
-    { label: "Applied", value: 38, color: "bg-[#127a72]" },
-    { label: "Interviews", value: 12, color: "bg-[#f3b34b]" },
-    { label: "Offers", value: 3, color: "bg-[#152038]" },
-    { label: "Response Rate", value: "31%", color: "bg-[#d35f57]" },
+    { label: "Applied", value: total, color: "bg-[#127a72]" },
+    { label: "Interviews", value: interviews, color: "bg-[#f3b34b]" },
+    { label: "Offers", value: offers, color: "bg-[#152038]" },
+    { label: "Response Rate", value: `${responseRate}%`, color: "bg-[#d35f57]" },
   ];
 
-  const applications = [
-    {
-      role: "Frontend Engineer",
-      company: "Northbeam Labs",
-      stage: "Interview",
-      appliedOn: "Mar 22",
-      followUp: "Apr 03",
-    },
-    {
-      role: "React Developer",
-      company: "Pocketbase",
-      stage: "Applied",
-      appliedOn: "Mar 27",
-      followUp: "Apr 04",
-    },
-    {
-      role: "Product Engineer",
-      company: "Aster Studio",
-      stage: "Offer",
-      appliedOn: "Mar 14",
-      followUp: "Apr 01",
-    },
-  ];
-
-  const stageStyles: Record<string, string> = {
-    Applied: "bg-[#e4f2ef] text-[#0d5f59]",
-    Interview: "bg-[#fff2dc] text-[#8b5a0b]",
-    Offer: "bg-[#e8ecf7] text-[#1c3260]",
-  };
+  const applications = all.slice(0, 3);
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-5 py-10 md:px-8">
@@ -52,9 +44,12 @@ export default function Home() {
               Next step is wiring real data with a database and auth.
             </p>
           </div>
-          <button className="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:translate-y-[-1px] hover:opacity-90">
+          <Link
+            href="/applications/new"
+            className="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:translate-y-[-1px] hover:opacity-90"
+          >
             Add Application
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -73,9 +68,9 @@ export default function Home() {
       <section className="card-enter stagger-2 rounded-3xl border border-[#e6dfcf] bg-[var(--surface)] p-6 shadow-[0_12px_30px_-14px_rgba(21,32,56,0.45)]">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold text-[var(--ink)]">Recent Applications</h2>
-          <a href="#" className="font-mono text-xs uppercase tracking-wider text-[var(--muted)]">
+          <Link href="/applications" className="font-mono text-xs uppercase tracking-wider text-[var(--muted)] hover:text-[var(--ink)]">
             View all
-          </a>
+          </Link>
         </div>
         <div className="mt-5 overflow-x-auto">
           <table className="w-full min-w-[640px] border-separate border-spacing-y-3 text-left">
@@ -90,7 +85,7 @@ export default function Home() {
             </thead>
             <tbody>
               {applications.map((app) => (
-                <tr key={`${app.role}-${app.company}`} className="rounded-xl bg-white text-sm">
+                <tr key={app.id} className="rounded-xl bg-white text-sm">
                   <td className="rounded-l-xl px-3 py-4 font-semibold text-[var(--ink)]">{app.role}</td>
                   <td className="px-3 py-4 text-[var(--muted)]">{app.company}</td>
                   <td className="px-3 py-4">
@@ -99,7 +94,7 @@ export default function Home() {
                     </span>
                   </td>
                   <td className="px-3 py-4 text-[var(--muted)]">{app.appliedOn}</td>
-                  <td className="rounded-r-xl px-3 py-4 text-[var(--muted)]">{app.followUp}</td>
+                  <td className="rounded-r-xl px-3 py-4 text-[var(--muted)]">{app.followUp || '—'}</td>
                 </tr>
               ))}
             </tbody>
