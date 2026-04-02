@@ -49,8 +49,9 @@ function mapRowToApplication(
   };
 }
 
-export async function listApplications(): Promise<Application[]> {
+export async function listApplications(userId: string): Promise<Application[]> {
   const rows = await prisma.application.findMany({
+    where: { userId },
     orderBy: { appliedOn: 'desc' },
     include: { notes: { orderBy: { createdAt: 'desc' }, take: 1 } },
   });
@@ -58,9 +59,12 @@ export async function listApplications(): Promise<Application[]> {
   return rows.map(mapRowToApplication);
 }
 
-export async function getApplicationById(id: string): Promise<Application | null> {
-  const row = await prisma.application.findUnique({
-    where: { id },
+export async function getApplicationById(
+  id: string,
+  userId: string,
+): Promise<Application | null> {
+  const row = await prisma.application.findFirst({
+    where: { id, userId },
     include: { notes: { orderBy: { createdAt: 'desc' }, take: 1 } },
   });
 
@@ -68,9 +72,13 @@ export async function getApplicationById(id: string): Promise<Application | null
   return mapRowToApplication(row);
 }
 
-export async function createApplication(input: Omit<Application, 'id'>): Promise<void> {
+export async function createApplication(
+  userId: string,
+  input: Omit<Application, 'id'>,
+): Promise<void> {
   await prisma.application.create({
     data: {
+      userId,
       role: input.role,
       company: input.company,
       location: input.location,
@@ -89,11 +97,12 @@ export async function createApplication(input: Omit<Application, 'id'>): Promise
 
 export async function updateApplication(
   id: string,
+  userId: string,
   input: Omit<Application, 'id'>,
 ): Promise<void> {
   await prisma.$transaction(async (tx) => {
-    await tx.application.update({
-      where: { id },
+    const updated = await tx.application.updateMany({
+      where: { id, userId },
       data: {
         role: input.role,
         company: input.company,
@@ -105,7 +114,13 @@ export async function updateApplication(
       },
     });
 
-    await tx.note.deleteMany({ where: { applicationId: id } });
+    if (updated.count === 0) {
+      return;
+    }
+
+    await tx.note.deleteMany({
+      where: { applicationId: id, application: { userId } },
+    });
 
     if (input.notes) {
       await tx.note.create({
@@ -118,6 +133,6 @@ export async function updateApplication(
   });
 }
 
-export async function deleteApplication(id: string): Promise<void> {
-  await prisma.application.delete({ where: { id } });
+export async function deleteApplication(id: string, userId: string): Promise<void> {
+  await prisma.application.deleteMany({ where: { id, userId } });
 }

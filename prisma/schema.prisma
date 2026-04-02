@@ -15,6 +15,7 @@ datasource db {
 
 model Application {
   id        String   @id @default(cuid())
+  userId    String?
   role      String
   company   String
   location  String
@@ -24,7 +25,20 @@ model Application {
   followUp  DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   notes     Note[]
+
+  @@index([userId])
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  applications Application[]
 }
 
 model Note {

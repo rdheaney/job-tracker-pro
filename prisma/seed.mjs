@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -42,12 +43,28 @@ const rows = [
 ];
 
 async function main() {
+  const hashedPassword = await bcrypt.hash('password123', 10);
+
+  const demoUser = await prisma.user.upsert({
+    where: { email: 'demo@jobtracker.dev' },
+    update: {
+      name: 'Demo User',
+      password: hashedPassword,
+    },
+    create: {
+      name: 'Demo User',
+      email: 'demo@jobtracker.dev',
+      password: hashedPassword,
+    },
+  });
+
   await prisma.note.deleteMany();
   await prisma.application.deleteMany();
 
   for (const row of rows) {
     await prisma.application.create({
       data: {
+        userId: demoUser.id,
         role: row.role,
         company: row.company,
         location: row.location,

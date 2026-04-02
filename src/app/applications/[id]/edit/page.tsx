@@ -1,16 +1,22 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { ApplicationForm } from '@/components/ApplicationForm';
 import { updateApplicationAction } from '@/app/actions/applications';
 import { getApplicationById } from '@/lib/applications';
+import { auth } from '@/auth';
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 export default async function EditApplicationPage({ params }: Props) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+
   const { id } = await params;
-  const application = await getApplicationById(id);
+  const application = await getApplicationById(id, session.user.id);
   if (!application) notFound();
 
   // Bind the id so the Server Action receives it as the first argument.

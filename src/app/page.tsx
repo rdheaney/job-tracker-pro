@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
 import { listApplications } from "@/lib/applications";
 import type { Stage } from "@/lib/types";
 
@@ -14,7 +16,12 @@ const stageStyles: Record<Stage, string> = {
 };
 
 export default async function Home() {
-  const all = await listApplications();
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+
+  const all = await listApplications(session.user.id);
   const total = all.length;
   const interviews = all.filter((a) => a.stage === "Interview").length;
   const offers = all.filter((a) => a.stage === "Offer").length;

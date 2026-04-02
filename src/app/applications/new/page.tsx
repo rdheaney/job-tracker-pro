@@ -1,8 +1,15 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
 import { ApplicationForm } from '@/components/ApplicationForm';
 import { createApplicationAction } from '@/app/actions/applications';
 
-export default function NewApplicationPage() {
+export default async function NewApplicationPage() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-10 md:px-8">
       <Link

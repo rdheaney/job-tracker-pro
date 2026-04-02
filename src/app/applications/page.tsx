@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
 import { listApplications } from '@/lib/applications';
 import { DeleteButton } from '@/components/DeleteButton';
 import type { Stage } from '@/lib/types';
@@ -15,7 +17,12 @@ const stageStyles: Record<Stage, string> = {
 };
 
 export default async function ApplicationsPage() {
-  const applications = await listApplications();
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+
+  const applications = await listApplications(session.user.id);
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 md:px-8">

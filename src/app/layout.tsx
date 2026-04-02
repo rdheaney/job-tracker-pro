@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import { Navbar } from "@/components/Navbar";
+import { auth } from '@/auth';
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -19,18 +20,20 @@ export const metadata: Metadata = {
   description: "Track applications, interviews, and outcomes in one dashboard.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html
       lang="en"
       className={`${spaceGrotesk.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar />
+        <Navbar user={session?.user} />
         {children}
       </body>
     </html>

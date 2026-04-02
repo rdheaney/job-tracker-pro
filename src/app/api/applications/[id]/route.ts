@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 
 interface Params {
@@ -6,9 +7,14 @@ interface Params {
 }
 
 export async function GET(_request: Request, { params }: Params) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = await params;
-  const application = await prisma.application.findUnique({
-    where: { id },
+  const application = await prisma.application.findFirst({
+    where: { id, userId: session.user.id },
     include: { notes: { orderBy: { createdAt: 'desc' } } },
   });
 
@@ -20,11 +26,16 @@ export async function GET(_request: Request, { params }: Params) {
 }
 
 export async function PATCH(request: Request, { params }: Params) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = await params;
   const body = await request.json();
 
-  const updated = await prisma.application.update({
-    where: { id },
+  const updated = await prisma.application.updateMany({
+    where: { id, userId: session.user.id },
     data: {
       role: body.role,
       company: body.company,
@@ -40,11 +51,25 @@ export async function PATCH(request: Request, { params }: Params) {
     },
   });
 
-  return NextResponse.json(updated);
+  if (updated.count === 0) {
+    return NextResponse.json({ message: 'Not found' }, { status: 404 });
+  }
+
+  const fresh = await prisma.application.findFirst({
+    where: { id, userId: session.user.id },
+    include: { notes: { orderBy: { createdAt: 'desc' } } },
+  });
+
+  return NextResponse.json(fresh);
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   const { id } = await params;
-  await prisma.application.delete({ where: { id } });
+  await prisma.application.deleteMany({ where: { id, userId: session.user.id } });
   return new NextResponse(null, { status: 204 });
 }

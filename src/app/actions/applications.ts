@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 import {
   createApplication,
   updateApplication,
@@ -44,15 +45,25 @@ function validate(data: ReturnType<typeof parseFormData>): FormState['errors'] |
   return Object.keys(err).length ? err : undefined;
 }
 
+async function requireUserId(): Promise<string> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    redirect('/login');
+  }
+  return userId;
+}
+
 export async function createApplicationAction(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
+  const userId = await requireUserId();
   const data = parseFormData(formData);
   const errors = validate(data);
   if (errors) return { errors };
 
-  await createApplication(data);
+  await createApplication(userId, data);
   revalidatePath('/');
   revalidatePath('/applications');
   redirect('/applications');
@@ -63,18 +74,20 @@ export async function updateApplicationAction(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
+  const userId = await requireUserId();
   const data = parseFormData(formData);
   const errors = validate(data);
   if (errors) return { errors };
 
-  await updateApplication(id, data);
+  await updateApplication(id, userId, data);
   revalidatePath('/');
   revalidatePath('/applications');
   redirect('/applications');
 }
 
 export async function deleteApplicationAction(id: string): Promise<void> {
-  await deleteApplication(id);
+  const userId = await requireUserId();
+  await deleteApplication(id, userId);
   revalidatePath('/');
   revalidatePath('/applications');
 }
