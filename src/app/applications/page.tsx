@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { listApplications } from '@/lib/applications';
 import { DeleteButton } from '@/components/DeleteButton';
+import { ApplicationFilters } from '@/components/ApplicationFilters';
 import type { Stage } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -16,13 +18,32 @@ const stageStyles: Record<Stage, string> = {
   Withdrawn: 'bg-[#f4f4f5] text-[#71717a]',
 };
 
-export default async function ApplicationsPage() {
+interface Props {
+  searchParams: Promise<{ stage?: string; q?: string }>;
+}
+
+export default async function ApplicationsPage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect('/login');
   }
 
-  const applications = await listApplications(session.user.id);
+  const { stage: stageFilter, q: search } = await searchParams;
+
+  const all = await listApplications(session.user.id);
+
+  const applications = all.filter((app) => {
+    if (stageFilter && app.stage !== stageFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      if (!app.role.toLowerCase().includes(q) && !app.company.toLowerCase().includes(q)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const isFiltered = Boolean(stageFilter || search);
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 md:px-8">
@@ -36,7 +57,11 @@ export default async function ApplicationsPage() {
         </Link>
       </div>
 
-      {applications.length === 0 ? (
+      <Suspense fallback={null}>
+        <ApplicationFilters />
+      </Suspense>
+
+      {all.length === 0 ? (
         <div className="rounded-3xl border border-[#e6dfcf] bg-[var(--surface)] p-16 text-center">
           <p className="text-[var(--muted)]">No applications yet.</p>
           <Link
@@ -44,6 +69,16 @@ export default async function ApplicationsPage() {
             className="mt-4 inline-block text-sm font-semibold text-[var(--teal)]"
           >
             Add your first one →
+          </Link>
+        </div>
+      ) : applications.length === 0 && isFiltered ? (
+        <div className="rounded-3xl border border-[#e6dfcf] bg-[var(--surface)] p-16 text-center">
+          <p className="text-[var(--muted)]">No applications match your filters.</p>
+          <Link
+            href="/applications"
+            className="mt-4 inline-block text-sm font-semibold text-[var(--teal)]"
+          >
+            Clear filters →
           </Link>
         </div>
       ) : (

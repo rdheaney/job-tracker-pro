@@ -42,6 +42,10 @@ body {
   animation-delay: 240ms;
 }
 
+.stagger-4 {
+  animation-delay: 320ms;
+}
+
 @keyframes card-enter {
   from {
     opacity: 0;

@@ -2,7 +2,17 @@ import Link from "next/link";
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { listApplications } from "@/lib/applications";
+import { PipelineChart } from "@/components/PipelineChart";
 import type { Stage } from "@/lib/types";
+
+const ALL_STAGES: Stage[] = [
+  "Applied",
+  "Phone Screen",
+  "Interview",
+  "Offer",
+  "Rejected",
+  "Withdrawn",
+];
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +37,11 @@ export default async function Home() {
   const offers = all.filter((a) => a.stage === "Offer").length;
   const responded = all.filter((a) => a.stage !== "Applied").length;
   const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0;
+
+  const chartData = ALL_STAGES.map((stage) => ({
+    stage,
+    count: all.filter((a) => a.stage === stage).length,
+  }));
 
   const stats = [
     { label: "Applied", value: total, color: "bg-[#127a72]" },
@@ -74,7 +89,16 @@ export default async function Home() {
         ))}
       </section>
 
-      <section className="card-enter stagger-2 rounded-3xl border border-[#e6dfcf] bg-[var(--surface)] p-6 shadow-[0_12px_30px_-14px_rgba(21,32,56,0.45)]">
+      <section className="card-enter stagger-3 rounded-3xl border border-[#e6dfcf] bg-[var(--surface)] p-6 shadow-[0_12px_30px_-14px_rgba(21,32,56,0.45)]">
+        <h2 className="mb-5 text-2xl font-semibold text-[var(--ink)]">Pipeline by Stage</h2>
+        {total === 0 ? (
+          <p className="py-10 text-center text-sm text-[var(--muted)]">No applications yet — add one to see your pipeline.</p>
+        ) : (
+          <PipelineChart data={chartData} />
+        )}
+      </section>
+
+      <section className="card-enter stagger-4 rounded-3xl border border-[#e6dfcf] bg-[var(--surface)] p-6 shadow-[0_12px_30px_-14px_rgba(21,32,56,0.45)]">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold text-[var(--ink)]">Recent Applications</h2>
           <Link href="/applications" className="font-mono text-xs uppercase tracking-wider text-[var(--muted)] hover:text-[var(--ink)]">
@@ -82,6 +106,17 @@ export default async function Home() {
           </Link>
         </div>
         <div className="mt-5 overflow-x-auto">
+          {applications.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-sm text-[var(--muted)]">No applications yet.</p>
+              <Link
+                href="/applications/new"
+                className="mt-3 inline-block text-sm font-semibold text-[var(--teal)]"
+              >
+                Add your first one →
+              </Link>
+            </div>
+          ) : (
           <table className="w-full min-w-[640px] border-separate border-spacing-y-3 text-left">
             <thead>
               <tr className="text-sm text-[var(--muted)]">
@@ -108,6 +143,7 @@ export default async function Home() {
               ))}
             </tbody>
           </table>
+          )};
         </div>
       </section>
     </main>
