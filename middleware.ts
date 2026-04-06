@@ -1,6 +1,9 @@
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { auth } from './src/auth';
+import { authConfig } from './src/auth.config';
+
+const { auth } = NextAuth(authConfig);
 
 type MiddlewareAuthRequest = NextRequest & { auth?: unknown };
 
